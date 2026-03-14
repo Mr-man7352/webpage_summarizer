@@ -1,14 +1,14 @@
 import trafilatura
 from trafilatura.settings import use_config
-import requests
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
+
 
 # Standard headers to fetch a website
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
 }
 
-def fetch_website_contents(url, char_limit=5000):
+async def fetch_website_contents(url, char_limit=5000):
     """
     Return the title and contents of the website at the given url;
     truncate to {char_limit} characters as a sensible limit
@@ -18,13 +18,13 @@ def fetch_website_contents(url, char_limit=5000):
         # 1. Handle Network Errors (Timeout or Connection Issues)
         """Fetch for dynamic/JS-rendered sites."""
         print("This will take a moment... grab a coffee! ☕")
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.goto(url)
-            page.wait_for_timeout(6000)  # Wait 6s for JS to render
-            content = page.content()
-            browser.close()
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(url)
+            await page.wait_for_timeout(6000)  # Wait 6s for JS to render
+            content = await page.content()
+            await browser.close()
     except Exception as e:
         print(f"Error fetching website contents for {url}: {e}")
         return False
