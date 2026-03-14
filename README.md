@@ -1,0 +1,1 @@
+dont forget to install chromium for playwright using `playwright install chromium` after installing the dependencies.

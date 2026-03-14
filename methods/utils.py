@@ -1,6 +1,7 @@
 import trafilatura
 from trafilatura.settings import use_config
 import requests
+from playwright.sync_api import sync_playwright
 
 # Standard headers to fetch a website
 headers = {
@@ -15,13 +16,21 @@ def fetch_website_contents(url, char_limit=5000):
 
     try:
         # 1. Handle Network Errors (Timeout or Connection Issues)
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status() # Raises an error for 4xx or 5xx responses
+        """Fetch for dynamic/JS-rendered sites."""
+        print("This will take a moment... grab a coffee! ☕")
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(url)
+            page.wait_for_timeout(6000)  # Wait 6s for JS to render
+            content = page.content()
+            browser.close()
     except Exception as e:
+        print(f"Error fetching website contents for {url}: {e}")
         return False
 
     try:
-        html = response.text
+        html = content
         # Extract metadata
         metadata = trafilatura.extract_metadata(html, default_url=url)
 
